@@ -55,12 +55,12 @@ void PlotRoot() {
 	// PlotNames.push_back("ProtonBlipMaxWireSpan");
 	// PlotNames.push_back("ProtonBlipEnergy");
 
-	// PlotNames.push_back("RecoMuonCosThetaPlot");
-	// PlotNames.push_back("RecoDeltaPtPlot");
-	// PlotNames.push_back("RecoDeltaAlphaTPlot");
-	PlotNames.push_back("RecoVertexXPlot");
-	PlotNames.push_back("RecoVertexYPlot");
-	PlotNames.push_back("RecoVertexZPlot");
+	PlotNames.push_back("RecoMuonCosThetaPlot");
+	PlotNames.push_back("RecoDeltaPtPlot");
+	PlotNames.push_back("RecoDeltaAlphaTPlot");
+	// PlotNames.push_back("RecoVertexXPlot");
+	// PlotNames.push_back("RecoVertexYPlot");
+	// PlotNames.push_back("RecoVertexZPlot");
 	
 	// PlotNames.push_back("RecoPMissMagPlot");
 	// PlotNames.push_back("RecoPMissDirPlot");
