@@ -1729,13 +1729,19 @@ NeutrinoSelectionFilter::NeutrinoSelectionFilter(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/uboone/persistent/users/birwin/NTuples/May2023/MCC9Overlay_12000.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("/pnfs/uboone/persistent/users/birwin/NTuples/May2023/MCC9Overlay_12000.root");
-      }
-      TDirectory * dir = (TDirectory*)f->Get("/pnfs/uboone/persistent/users/birwin/NTuples/May2023/MCC9Overlay_12000.root:/nuselection");
-      dir->GetObject("NeutrinoSelectionFilter",tree);
-
+     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/uboone/persistent/users/birwin/NTuples/May2023/MCC9Overlay_12000.root"); //40k events
+     //TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/uboone/persistent/users/davidc/searchingfornues/v08_00_00_43/0928/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root"); //1M events
+     //TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/uboone/data/users/apapadop/searchingfornues/neutronstudy_overlay_run1.root"); //23k events
+     if (!f || !f->IsOpen()) {
+       f = new TFile("/pnfs/uboone/persistent/users/birwin/NTuples/May2023/MCC9Overlay_12000.root"); //40k events
+       //f = new TFile("/pnfs/uboone/persistent/users/davidc/searchingfornues/v08_00_00_43/0928/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root"); //1M events
+       //f = new TFile("/uboone/data/users/apapadop/searchingfornues/neutronstudy_overlay_run1.root"); //23k events
+     }
+     TDirectory * dir = (TDirectory*)f->Get("/pnfs/uboone/persistent/users/birwin/NTuples/May2023/MCC9Overlay_12000.root:/nuselection"); //40k events
+     //TDirectory * dir = (TDirectory*)f->Get("/pnfs/uboone/persistent/users/davidc/searchingfornues/v08_00_00_43/0928/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root:/nuselection"); //1M events
+     //TDirectory * dir = (TDirectory*)f->Get("/uboone/data/users/apapadop/searchingfornues/neutronstudy_overlay_run1.root:/nuselection"); //23k events
+     dir->GetObject("NeutrinoSelectionFilter",tree);
+     
    }
    Init(tree);
 }
