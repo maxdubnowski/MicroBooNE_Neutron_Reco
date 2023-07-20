@@ -3,25 +3,25 @@
 source setup.sh
 
 
-Under Constants.h, Choose to apply(not apply) PMissingCut by setting
+## Under Constants.h, Choose to apply(not apply) PMissingCut by setting
 bool PMissingCut = true (false);
 
 
-Choose Event File to run on:
+## Choose Event File to run on:
 emacs NeutrinoSelectionFilter.h
-ctrl+s: Open
-Change TFile and TDirectory
+### ctrl+s: Open
+### Change TFile and TDirectory
 
 
-Run the Neutron Selection Filter
+## Run the Neutron Selection Filter
 root -l script_MicroBooNE_Reco.C
 
-Run the 1D Plot:
-Choose whether a stacked (unstacked) histogram
-       Under PlotRoot.cpp
-       bool stackedHist = true (false);
+## Run the 1D Plot:
+### Choose whether a stacked (unstacked) histogram
+### Under PlotRoot.cpp
+bool stackedHist = true (false);
 root -l PlotRoot.cpp
 
 
-Run the 2D Plot:
+## Run the 2D Plot:
 root -l PlotRoot2D.cpp
