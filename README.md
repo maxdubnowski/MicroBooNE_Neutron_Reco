@@ -25,3 +25,10 @@ root -l PlotRoot.cpp
 
 ## Run the 2D Plot:
 root -l PlotRoot2D.cpp
+
+
+
+# Using High Statistics Version
+cd HighStats
+### All of the scripts run in the same fashion, but must access Constants.h file through ../Constants.h
+
