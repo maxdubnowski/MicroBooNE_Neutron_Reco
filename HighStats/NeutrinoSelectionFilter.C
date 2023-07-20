@@ -1,4 +1,3 @@
-
 #define NeutrinoSelectionFilter_cxx
 #include "NeutrinoSelectionFilter.h"
 #include <TH1D.h>
@@ -6,7 +5,7 @@
 #include <TString.h>
 #include <TVector3.h>
 
-#include "Constants.h"
+#include "../Constants.h"
 
 using namespace std;
 using namespace Constants;
@@ -88,18 +87,26 @@ void NeutrinoSelectionFilter::Loop() {
    
    TH1D* BlipPDG[NInte][3]; //Interaction mechanisms, 3 interaction types (All, CC1p0pi, nonCC1p0pi)
    TH1D* BlipMultiplicity[NInte][3]; //3 interaction types
+   TH1D* AssociatedBlipMultiplicity[NInte][3];
    TH1D* BlipLocation[NInte][3][3]; //Interaction mechanisms, 3 directions (X,Y,Z) and 3 interaction types
    TH1D* BlipVertexDist[NInte][3];
    TH1D* ProtonBlipDist[NInte][3];
 
+   TH1D* BlipVertexDistNeut[NInte][3][NNeut+1];
+   TH1D* BlipProxTrkDistNeut[NInte][3][NNeut+1];
+   
+   TH2D* AssociatedBlipMultVsVertexDist[NInte][3][NNeut+1];
+   TH2D* AssociatedBlipMultVsProxTrkDist[NInte][3][NNeut+1];
 
-   TH1D* BlipCharge[NInte][3];
+   TH2D* AssociatedBlipVertexDistVsProxTrkDist[NInte][3];
+
+   //TH1D* BlipCharge[NInte][3];
    TH1D* BlipProxTrkDist[NInte][3];
    TH1D* BlipTime[NInte][3];
    TH1D* BlipLength[NInte][3];
    TH1D* BlipMaxWireSpan[NInte][3];
    TH1D* BlipEnergy[NInte][3];
-   TH1D* ProtonBlipCharge[NInte][3];
+   //TH1D* ProtonBlipCharge[NInte][3];
    TH1D* ProtonBlipProxTrkDist[NInte][3];
    TH1D* ProtonBlipTime[NInte][3];
    TH1D* ProtonBlipLength[NInte][3];
@@ -112,13 +119,21 @@ void NeutrinoSelectionFilter::Loop() {
    TH2D* BlipVertexDistVsPMissDir[NInte][3];
    TH2D* BlipMultiplicityVsVertexDist[NInte][3];
    TH2D* BlipMultiplicityVsProxDist[NInte][3];
+   TH2D* ProxDistVsNeutronMultiplicity[NInte][3];
+   TH2D* VertexDistVsNeutronMultiplicity[NInte][3];
 
    TH2D* BlipVertexDistVsEnergy[3];
    TH2D* ProtonBlipVertexDistVsEnergy[3];
    TH2D* BlipProxDistVsEnergy[3];
    TH2D* ProtonBlipProxDistVsEnergy[3];
    
- 
+   TH1D* PostBlipCutRecoMuonCosThetaPlot[NInte][3][NCuts];
+   TH1D* PostBlipCutRecoDeltaPtPlot[NInte][3][NCuts];
+   TH1D* PostBlipCutRecoDeltaAlphaTPlot[NInte][3][NCuts];
+   TH1D* PostBlipCutTrueNeutronMultiplicityPlot[NInte][3][NCuts];
+
+
+    
 
 
    // Initialize Histograms
@@ -145,7 +160,20 @@ void NeutrinoSelectionFilter::Loop() {
        RecoDeltaAlphaTPlot[inte][type] = new TH1D(InteractionLabels[inte]+"RecoDeltaAlphaTPlot"+ CC1p0piLabels[type],LabelXAxisDeltaAlphaT,NBinsDeltaAlphaT,ArrayNBinsDeltaAlphaT);
        RecoPMissMagPlot[inte][type] = new TH1D(InteractionLabels[inte]+"RecoPMissMagPlot"+ CC1p0piLabels[type],";P_{miss} ;Weighted Events" , 10 ,0 ,1 );
        RecoPMissDirPlot[inte][type] = new TH1D(InteractionLabels[inte]+"RecoPMissDirPlot"+ CC1p0piLabels[type],";cos(#theta_{miss}) ;Weighted Events" , 10 ,-1 ,1 );
-       
+
+
+       for (int cut=0; cut <NCuts; cut++){
+	 PostBlipCutRecoMuonCosThetaPlot[inte][type][cut] = new TH1D(InteractionLabels[inte]+"PostBlipCutRecoMuonCosThetaPlot"+ BlipCuts[cut]+ CC1p0piLabels[type],LabelXAxisMuonCosTheta,NBinsMuonCosTheta,ArrayNBinsMuonCosTheta);
+	
+	 PostBlipCutRecoDeltaPtPlot[inte][type][cut] = new TH1D(InteractionLabels[inte]+"PostBlipCutRecoDeltaPtPlot"+ BlipCuts[cut]+ CC1p0piLabels[type],LabelXAxisDeltaPT,NBinsDeltaPT,ArrayNBinsDeltaPT);
+	 
+	 PostBlipCutRecoDeltaAlphaTPlot[inte][type][cut] = new TH1D(InteractionLabels[inte]+"PostBlipCutRecoDeltaAlphaTPlot"+ BlipCuts[cut]+ CC1p0piLabels[type],LabelXAxisDeltaAlphaT,NBinsDeltaAlphaT,ArrayNBinsDeltaAlphaT);
+	 
+	 PostBlipCutTrueNeutronMultiplicityPlot[inte][type][cut] = new TH1D(InteractionLabels[inte] +"PostBlipCutTrueNeutronMultiplicityPlot" + BlipCuts[cut]+ CC1p0piLabels[type], ";Neutron Multiplicity ; Weighted Events" , 6, -0.5, 5.5);
+       } //End of selection cut naming
+
+
+
        BacktrackedMuonCosThetaPlot[inte][type] = new TH1D(InteractionLabels[inte]+"BacktrackedMuonCosThetaPlot"+ CC1p0piLabels[type],LabelXAxisMuonCosTheta,NBinsMuonCosTheta,ArrayNBinsMuonCosTheta);
        BacktrackedDeltaPtPlot[inte][type] = new TH1D(InteractionLabels[inte]+"BacktrackedDeltaPtPlot"+ CC1p0piLabels[type], LabelXAxisDeltaPT, NBinsDeltaPT, ArrayNBinsDeltaPT);
        BacktrackedDeltaAlphaTPlot[inte][type] = new TH1D(InteractionLabels[inte]+"BacktrackedDeltaAlphaTPlot"+ CC1p0piLabels[type], LabelXAxisDeltaAlphaT, NBinsDeltaAlphaT, ArrayNBinsDeltaAlphaT);
@@ -171,26 +199,27 @@ void NeutrinoSelectionFilter::Loop() {
             
        BlipPDG[inte][type] = new TH1D(InteractionLabels[inte]+"BlipPDG" + CC1p0piLabels[type], ";Blip PDG ;Weighted Events", 6000,-3000.5,2999.5);
        BlipMultiplicity[inte][type] = new TH1D(InteractionLabels[inte]+"BlipMultiplicity" + CC1p0piLabels[type], ";Blip Multiplicity ;Weighted Events", 50,29.5,179.5);
+       AssociatedBlipMultiplicity[inte][type] = new TH1D(InteractionLabels[inte]+"AssociatedBlipMultiplicity" + CC1p0piLabels[type], ";Blip Multiplicity ;Weighted Events", 20,-0.5,19.5);
        BlipLocation[inte][0][type] = new TH1D(InteractionLabels[inte]+"XAxisBlipLocation" + CC1p0piLabels[type], ";X - Axis [cm]; Weighted Events",  NBinsVertexX , MinVertexX , MaxVertexX);
        BlipLocation[inte][1][type] = new TH1D(InteractionLabels[inte]+"YAxisBlipLocation" + CC1p0piLabels[type], ";Y - Axis [cm]; Weighted Events",  NBinsVertexY , MinVertexY , MaxVertexY);
        BlipLocation[inte][2][type] = new TH1D(InteractionLabels[inte]+"ZAxisBlipLocation" + CC1p0piLabels[type], ";Z - Axis [cm]; Weighted Events",  NBinsVertexZ , MinVertexZ , MaxVertexZ);
 
        BlipVertexDist[inte][type] = new TH1D(InteractionLabels[inte]+"BlipVertexDist" + CC1p0piLabels[type], ";Distance [cm] ; Weighted Events" , 20,0, 800);
-       ProtonBlipDist[inte][type] = new TH1D(InteractionLabels[inte]+"ProtonBlipDist" + CC1p0piLabels[type], ";Distance [cm] ; Weighted Events" , 20,0, 400);
+       ProtonBlipDist[inte][type] = new TH1D(InteractionLabels[inte]+"ProtonBlipDist" + CC1p0piLabels[type], ";Distance [cm] ; Weighted Events" , 20,0, 800);
 
-       BlipCharge[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipCharge" + CC1p0piLabels[type], ";Charge ; Weighted Events" , 20,0, 1000000);
-       BlipProxTrkDist[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipProxTrkDist" + CC1p0piLabels[type], ";Nearest Track Distance [cm]; Weighted Events" , 20,0, 200);
+       //BlipCharge[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipCharge" + CC1p0piLabels[type], ";Charge ; Weighted Events" , 20,0, 1000000);
+       BlipProxTrkDist[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipProxTrkDist" + CC1p0piLabels[type], ";Nearest Track Distance [cm]; Weighted Events" , 20,0, 300);
        BlipTime[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipTime" + CC1p0piLabels[type], ";Time [ticks]; Weighted Events" , 40,0, 5000);
        //BlipLength[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipLength" + CC1p0piLabels[type], ";Length [cm] ; Weighted Events" , 20,60, 80);
        BlipMaxWireSpan[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipMaxWireSpan" + CC1p0piLabels[type], ";Max Wire Span ; Weighted Events" , 15,-0.5, 14.5);
-       BlipEnergy[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipEnergy" + CC1p0piLabels[type], ";Energy ; Weighted Events" , 20,0, 25);
+       BlipEnergy[inte][type] =  new TH1D(InteractionLabels[inte]+"BlipEnergy" + CC1p0piLabels[type], ";Energy ; Weighted Events" , 20,0, 50);
 
-       ProtonBlipCharge[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipCharge" + CC1p0piLabels[type], ";Charge ; Weighted Events" , 20,0, 1000000);
-       ProtonBlipProxTrkDist[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipProxTrkDist" + CC1p0piLabels[type], ";Nearest Track Distance [cm]; Weighted Events" , 20,0, 150);
+       //ProtonBlipCharge[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipCharge" + CC1p0piLabels[type], ";Charge ; Weighted Events" , 20,0, 1000000);
+       ProtonBlipProxTrkDist[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipProxTrkDist" + CC1p0piLabels[type], ";Nearest Track Distance [cm]; Weighted Events" , 20,0, 300);
        ProtonBlipTime[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipTime" + CC1p0piLabels[type], ";Time [ticks]; Weighted Events" , 20,0, 5000);
        //ProtonBlipLength[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipLength" + CC1p0piLabels[type], ";Length [cm] ; Weighted Events" , 20,0, 400);
        ProtonBlipMaxWireSpan[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipMaxWireSpan" + CC1p0piLabels[type], ";Max Wire Span ; Weighted Events" , 15,-0.5, 14.5);
-       ProtonBlipEnergy[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipEnergy" + CC1p0piLabels[type], ";Energy ; Weighted Events" , 20,0, 25);
+       ProtonBlipEnergy[inte][type] =  new TH1D(InteractionLabels[inte]+"ProtonBlipEnergy" + CC1p0piLabels[type], ";Energy ; Weighted Events" , 20,0, 50);
 
 
 
@@ -198,21 +227,59 @@ void NeutrinoSelectionFilter::Loop() {
        BlipVertexDistVsPMissMag[inte][type] = new TH2D(InteractionLabels[inte]+"BlipVertexDistVsPMissMag" + CC1p0piLabels[type], ";Vertex Distance ;P_{miss} Magnitude [GeV/c] " , 20,0, 400, 20,0,1.5);
        BlipProxDistVsPMissDir[inte][type] = new TH2D(InteractionLabels[inte]+"BlipProxDistVsPMissDir" + CC1p0piLabels[type], ";Nearest Track Distance ;cos(#theta_{miss})" , 20,0, 150, 20,-1,1);
        BlipVertexDistVsPMissDir[inte][type] = new TH2D(InteractionLabels[inte]+"BlipVertexDistVsPMissDir" + CC1p0piLabels[type], ";Vertex Track Distance ;cos(#theta_{miss})" , 20,0, 400, 20,-1,1);
-       BlipMultiplicityVsProxDist[inte][type] = new TH2D(InteractionLabels[inte]+"BlipMultiplicityVsProxDist" + CC1p0piLabels[type], ";Nearest Track Distance ;Blip Multiplicity" , 20,0, 150, 20,30,150);
-       BlipMultiplicityVsVertexDist[inte][type] = new TH2D(InteractionLabels[inte]+"BlipMultiplicityVsVertexDist" + CC1p0piLabels[type], ";Vertex Track Distance ;Blip Multiplicity" , 20,0, 400, 20,30,150);
+       BlipMultiplicityVsProxDist[inte][type] = new TH2D(InteractionLabels[inte]+"BlipMultiplicityVsProxDist" + CC1p0piLabels[type], ";Nearest Track Distance ;Blip Multiplicity" , 20,0,300, 20,30,150);
+       BlipMultiplicityVsVertexDist[inte][type] = new TH2D(InteractionLabels[inte]+"BlipMultiplicityVsVertexDist" + CC1p0piLabels[type], ";Vertex Distance ;Blip Multiplicity" , 20,0, 800, 20,30,150);
+       ProxDistVsNeutronMultiplicity[inte][type] = new TH2D(InteractionLabels[inte]+"ProxDistVsNeutronMultiplicity" + CC1p0piLabels[type], ";Nearest Track Distance ;Neutron Multiplicity" , 20,0, 300, 21,-0.5,20.5);
+       VertexDistVsNeutronMultiplicity[inte][type] = new TH2D(InteractionLabels[inte]+"VertexDistVsNeutronMultiplicity" + CC1p0piLabels[type], ";Vertex Distance ;Neutron Multiplicity" , 20,0, 800, 21,-0.5,20.5);
+       
+       
+
+       AssociatedBlipVertexDistVsProxTrkDist[inte][type] = new TH2D(InteractionLabels[inte]+"AssociatedBlipVertexDistVsProxTrkDist" + CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Vertex Distance [cm]" , 20,0, 300, 20,0 , 600);
 
 
+       BlipVertexDistNeut[inte][type][NNeut-1] =  new TH1D(InteractionLabels[inte]+"BlipVertexDist"+Form("OverNeutron%d", NNeut-1) + CC1p0piLabels[type], ";Distance [cm] ; Weighted Events" , 20,0, 600);
+       BlipProxTrkDistNeut[inte][type][NNeut-1] =  new TH1D(InteractionLabels[inte]+"BlipProxTrkDist" +Form("OverNeutron%d", NNeut-1)+ CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Weighted Events" , 20,0, 300);
+       AssociatedBlipMultVsVertexDist[inte][type][NNeut-1] = new TH2D(InteractionLabels[inte]+"AssociatedBlipMultVsVertexDist" +Form("OverNeutron%d", NNeut-1)+ CC1p0piLabels[type], ";Distance [cm] ; Associated Blip Multiplicity" , 20,0, 600, 20,-0.5,19.5);
+       
+       AssociatedBlipMultVsProxTrkDist[inte][type][NNeut-1] = new TH2D(InteractionLabels[inte]+"AssociatedBlipMultVsProxTrkDist" +Form("OverNeutron%d", NNeut-1)+ CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Associated Blip Multiplicity" , 20,0, 300, 20,-0.5,19.5);
 
-     }
 
-     // 2D Analysis
+       BlipVertexDistNeut[inte][type][NNeut] =  new TH1D(InteractionLabels[inte]+"BlipVertexDist"+"AllNeutron" + CC1p0piLabels[type], ";Distance [cm] ; Weighted Events" , 20,0, 600);
+       BlipProxTrkDistNeut[inte][type][NNeut] =  new TH1D(InteractionLabels[inte]+"BlipProxTrkDist" +"AllNeutron"+ CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Weighted Events" , 20,0, 300);
+       AssociatedBlipMultVsVertexDist[inte][type][NNeut] = new TH2D(InteractionLabels[inte]+"AssociatedBlipMultVsVertexDist" +"AllNeutron"+ CC1p0piLabels[type], ";Distance [cm] ; Associated Blip Multiplicity" , 20,0, 600, 20,-0.5,19.5);
+       
+       AssociatedBlipMultVsProxTrkDist[inte][type][NNeut] = new TH2D(InteractionLabels[inte]+"AssociatedBlipMultVsProxTrkDist" +"AllNeutron"+ CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Associated Blip Multiplicity" , 20,0, 300, 20,-0.5,19.5);
 
+       
+       
+       for (int neut=0; neut<NNeut-1; neut++){
+	 BlipVertexDistNeut[inte][type][neut] =  new TH1D(InteractionLabels[inte]+"BlipVertexDist" +Form("Neutron%d", neut)+ CC1p0piLabels[type], ";Distance [cm] ; Weighted Events" , 20,0, 600);
+	 BlipProxTrkDistNeut[inte][type][neut] =  new TH1D(InteractionLabels[inte]+"BlipProxTrkDist"+Form("Neutron%d", neut) + CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Weighted Events" , 20,0, 300);
+	 
+	 AssociatedBlipMultVsVertexDist[inte][type][neut] = new TH2D(InteractionLabels[inte]+"AssociatedBlipMultVsVertexDist" +Form("Neutron%d", neut)+ CC1p0piLabels[type], ";Distance [cm] ; Associated Blip Multiplicity" , 20,0, 600, 20,-0.5,19.5);
+	 AssociatedBlipMultVsProxTrkDist[inte][type][neut] = new TH2D(InteractionLabels[inte]+"AssociatedBlipMultVsProxTrkDist" +Form("Neutron%d", neut)+ CC1p0piLabels[type], ";Nearest Track Distance [cm] ; Associated Blip Multiplicity" , 20,0, 300, 20,-0.5,19.5);
+	 
+       } // End of loop over the neutron multiplicity
+
+
+     } // End of For loop over the type of signal
    } // End of the loop over the interaction processes
+   
 
 
-   int counter =0,  trueCounter=0, blipCounter =0, noBlipCounter=0;
+
+
+
+
+
+
+
+
+
+   int counter =0,  trueCounter=0, noBlipCounter=0;
    // Loop over the events
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+     //for (Long64_t jentry=0; jentry<20000;jentry++) {
 
 
       Long64_t ientry = LoadTree(jentry);
@@ -224,8 +291,8 @@ void NeutrinoSelectionFilter::Loop() {
 
       // MC weight to scale events to data pot
       //if (fabs(weightSplineTimesTune) != weightSplineTimesTune){ continue;}
-
-      double event_weight = (data_pot / mc_pot);// * weightSplineTimesTune;
+      if (weightSplineTimesTune <= 0 || weightSplineTimesTune > 30) { continue; } // bug fix weight
+      double event_weight = (data_pot / mc_pot_highStat) * weightSplineTimesTune;
 
 
 
@@ -724,8 +791,7 @@ void NeutrinoSelectionFilter::Loop() {
       
 
       // Fill in the plots
-      // All events, 2nd index = 0
-      
+      // All events, 2nd index = 0 
       RecoMuonCosThetaPlot[0][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
       RecoDeltaPtPlot[0][0]->Fill(recoDeltaPT,event_weight);
       RecoDeltaAlphaTPlot[0][0]->Fill(recoDeltaAlphaT,event_weight);
@@ -837,6 +903,7 @@ void NeutrinoSelectionFilter::Loop() {
       // Loop over the blips
       // if (blip_ID->size() ==0) { cout << "No Blip" << endl; noBlipCounter++; }
       int numBlips = blip_ID->size();
+      
       BlipMultiplicity[0][0]->Fill(numBlips, event_weight);
       BlipMultiplicity[genie_mode][0]->Fill(numBlips, event_weight);
       bool protonBlip =false;
@@ -851,34 +918,54 @@ void NeutrinoSelectionFilter::Loop() {
 	BlipMultiplicity[genie_mode][2]->Fill(numBlips, event_weight);	      
       }
 
+
+      int blipCounter =0;
+      vector<int> AssociatedBlipID;
+      vector<double> blipVertex, blipProxTrk;
+      bool blipVertexTooSmall = false;
       if (blip_ID->size() >0 ){
-	
+		
 	for (int blip =0; blip < TMath::Abs(numBlips); blip++){
 	  if (blip_pdg->at(blip) !=-9){
+
 	    TVector3 blip_vertex(blip_X->at(blip),blip_Y->at(blip),blip_Z->at(blip));
 	    double blipVertexDistance = (blip_vertex - reco_vertex).Mag();
 	    regularBlip =true;
+	    //cout << " Index: " << blip_ProxTrkID->at(blip) << endl;
 	    
-	    //cout << "ProxTrkID Index: " << blip_ProxTrkID->at(blip) << endl;
 	    if (blip_ProxTrkID->at(blip) == CandidateMuonIndex || blip_ProxTrkID->at(blip) == CandidateProtonIndex){
 	      //cout << "Blip in Proximity" << endl;
-	      //cout << "Closest Track Distance: " << blip_ProxTrkDist->at(blip) << endl;
-	    
-	    
+	      //cout << "ID:  "  << endl;
+	      blipVertexTooSmall = false;
+	      blipCounter++;
+	      AssociatedBlipID.push_back(blipCounter-1);
+	      blipVertex.push_back(blipVertexDistance);
+	      blipProxTrk.push_back(blip_ProxTrkDist->at(blip));
+	      
+	      // cout << " Blip Vertex Distance: " << blipVertexDistance << "  Blip Prox Track Distance: " << blip_ProxTrkDist->at(blip) << "  ID: " << blip  << "  Associated Blip ID: " << AssociatedBlipID.at(blipCounter-1)<< endl;
+	      // cout << " Blip Vertex Distance: " << blipVertexDistance << "  Associated Blip Vertex Distance: " << blipVertex.at(blipCounter-1) <<  endl;
+
+
 	      BlipProxDistVsPMissMag[0][0]->Fill(blip_ProxTrkDist->at(blip),recoPMissingMag ,event_weight);
 	      BlipVertexDistVsPMissMag[0][0]->Fill(blipVertexDistance,recoPMissingMag ,event_weight);
 	      BlipProxDistVsPMissDir[0][0]->Fill(blip_ProxTrkDist->at(blip),recoPMissingDir ,event_weight);
 	      BlipVertexDistVsPMissDir[0][0]->Fill(blipVertexDistance,recoPMissingDir ,event_weight);
 	      BlipMultiplicityVsProxDist[0][0]->Fill(blip_ProxTrkDist->at(blip),TMath::Abs(numBlips) ,event_weight);
 	      BlipMultiplicityVsVertexDist[0][0]->Fill(blipVertexDistance, TMath::Abs(numBlips) ,event_weight);
+	      ProxDistVsNeutronMultiplicity[0][0]->Fill(blip_ProxTrkDist->at(blip) ,TrueNeutronCounter , event_weight);
+	      VertexDistVsNeutronMultiplicity[0][0]->Fill(blipVertexDistance ,TrueNeutronCounter , event_weight);
+	      AssociatedBlipVertexDistVsProxTrkDist[0][0]->Fill(blip_ProxTrkDist->at(blip),blipVertexDistance , event_weight);
 	      
+	      AssociatedBlipVertexDistVsProxTrkDist[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip),blipVertexDistance , event_weight);
 	      BlipProxDistVsPMissMag[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip),recoPMissingMag ,event_weight);
 	      BlipVertexDistVsPMissMag[genie_mode][0]->Fill(blipVertexDistance,recoPMissingMag ,event_weight);
 	      BlipProxDistVsPMissDir[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip),recoPMissingDir ,event_weight);
 	      BlipVertexDistVsPMissDir[genie_mode][0]->Fill(blipVertexDistance,recoPMissingDir ,event_weight);
 	      BlipMultiplicityVsProxDist[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip),TMath::Abs(numBlips) ,event_weight);
 	      BlipMultiplicityVsVertexDist[genie_mode][0]->Fill(blipVertexDistance, TMath::Abs(numBlips) ,event_weight);
-	      
+	      ProxDistVsNeutronMultiplicity[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip) ,TrueNeutronCounter , event_weight);
+	      VertexDistVsNeutronMultiplicity[genie_mode][0]->Fill(blipVertexDistance ,TrueNeutronCounter , event_weight);
+	     
 	      
 	      
 	      BlipLocation[0][0][0]->Fill(blip_X->at(blip), event_weight);
@@ -892,14 +979,14 @@ void NeutrinoSelectionFilter::Loop() {
 	      BlipVertexDist[0][0]->Fill(blipVertexDistance,event_weight);
 	      BlipVertexDist[genie_mode][0]->Fill(blipVertexDistance,event_weight);
 	      
-	      BlipCharge[0][0]->Fill(blip_Charge->at(blip), event_weight);
+	      //BlipCharge[0][0]->Fill(blip_Charge->at(blip), event_weight);
 	      BlipProxTrkDist[0][0]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 	      BlipTime[0][0]->Fill(blip_Time->at(blip), event_weight);
 	    //BlipLength[0][0]->Fill(blip_Length->at(blip), event_weight);
 	      BlipMaxWireSpan[0][0]->Fill(blip_MaxWireSpan->at(blip), event_weight);
 	      BlipEnergy[0][0]->Fill(blip_Energy->at(blip), event_weight);
 	      
-	      BlipCharge[genie_mode][0]->Fill(blip_Charge->at(blip), event_weight);
+	      //BlipCharge[genie_mode][0]->Fill(blip_Charge->at(blip), event_weight);
 	      BlipProxTrkDist[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 	      BlipTime[genie_mode][0]->Fill(blip_Time->at(blip), event_weight);
 	      //BlipLength[genie_mode][0]->Fill(blip_Length->at(blip), event_weight);
@@ -912,18 +999,42 @@ void NeutrinoSelectionFilter::Loop() {
 	      BlipProxDistVsEnergy[0]->Fill(blip_ProxTrkDist->at(blip), blip_Energy->at(blip), event_weight);
 	      
 
+	      BlipVertexDistNeut[0][0][NNeut]->Fill(blipVertexDistance, event_weight);
+	      BlipProxTrkDistNeut[0][0][NNeut]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+
+	      BlipVertexDistNeut[genie_mode][0][NNeut]->Fill(blipVertexDistance, event_weight);
+	      BlipProxTrkDistNeut[genie_mode][0][NNeut]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+
+	      if (TrueNeutronCounter <NNeut-1){
+		BlipVertexDistNeut[0][0][TrueNeutronCounter]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[0][0][TrueNeutronCounter]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+
+		BlipVertexDistNeut[genie_mode][0][TrueNeutronCounter]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[genie_mode][0][TrueNeutronCounter]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+	      } //End of true neutron Counter check
+	      
+	      else{
+		BlipVertexDistNeut[0][0][NNeut-1]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[0][0][NNeut-1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+
+		BlipVertexDistNeut[genie_mode][0][NNeut-1]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[genie_mode][0][NNeut-1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+	      } //End of overflow for neutron statement
+
+
+
 	      if (blip_pdg->at(blip) == 2212){
 		ProtonBlipDist[0][0]->Fill(blipVertexDistance, event_weight);
 		ProtonBlipDist[genie_mode][0]->Fill(blipVertexDistance, event_weight);	      
 		
-		ProtonBlipCharge[0][0]->Fill(blip_Charge->at(blip), event_weight);
+		//ProtonBlipCharge[0][0]->Fill(blip_Charge->at(blip), event_weight);
 		ProtonBlipProxTrkDist[0][0]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		ProtonBlipTime[0][0]->Fill(blip_Time->at(blip), event_weight);
 		//ProtonBlipLength[0][0]->Fill(blip_Length->at(blip), event_weight);
 		ProtonBlipMaxWireSpan[0][0]->Fill(blip_MaxWireSpan->at(blip), event_weight);
 		ProtonBlipEnergy[0][0]->Fill(blip_Energy->at(blip), event_weight);
 		
-		ProtonBlipCharge[genie_mode][0]->Fill(blip_Charge->at(blip), event_weight);
+		//ProtonBlipCharge[genie_mode][0]->Fill(blip_Charge->at(blip), event_weight);
 		ProtonBlipProxTrkDist[genie_mode][0]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		ProtonBlipTime[genie_mode][0]->Fill(blip_Time->at(blip), event_weight);
 		//ProtonBlipLength[genie_mode][0]->Fill(blip_Length->at(blip), event_weight);
@@ -955,14 +1066,14 @@ void NeutrinoSelectionFilter::Loop() {
 	      
 		BlipVertexDist[0][1]->Fill(blipVertexDistance,event_weight);
 		BlipVertexDist[genie_mode][1]->Fill(blipVertexDistance,event_weight);
-		BlipCharge[0][1]->Fill(blip_Charge->at(blip), event_weight);
+		//BlipCharge[0][1]->Fill(blip_Charge->at(blip), event_weight);
 		BlipProxTrkDist[0][1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		BlipTime[0][1]->Fill(blip_Time->at(blip), event_weight);
 		//BlipLength[0][1]->Fill(blip_Length->at(blip), event_weight);
 		BlipMaxWireSpan[0][1]->Fill(blip_MaxWireSpan->at(blip), event_weight);
 		BlipEnergy[0][1]->Fill(blip_Energy->at(blip), event_weight);
 	      
-		BlipCharge[genie_mode][1]->Fill(blip_Charge->at(blip), event_weight);
+		//BlipCharge[genie_mode][1]->Fill(blip_Charge->at(blip), event_weight);
 		BlipProxTrkDist[genie_mode][1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		BlipTime[genie_mode][1]->Fill(blip_Time->at(blip), event_weight);
 		// BlipLength[genie_mode][1]->Fill(blip_Length->at(blip), event_weight);
@@ -976,7 +1087,13 @@ void NeutrinoSelectionFilter::Loop() {
 		BlipVertexDistVsPMissDir[0][1]->Fill(blipVertexDistance,recoPMissingDir ,event_weight);
 		BlipMultiplicityVsProxDist[0][1]->Fill(blip_ProxTrkDist->at(blip),TMath::Abs(numBlips) ,event_weight);
 		BlipMultiplicityVsVertexDist[0][1]->Fill(blipVertexDistance, TMath::Abs(numBlips) ,event_weight);
+		ProxDistVsNeutronMultiplicity[0][1]->Fill(blip_ProxTrkDist->at(blip) ,TrueNeutronCounter , event_weight);
+		VertexDistVsNeutronMultiplicity[0][1]->Fill(blipVertexDistance ,TrueNeutronCounter , event_weight);
+		AssociatedBlipVertexDistVsProxTrkDist[0][1]->Fill(blip_ProxTrkDist->at(blip),blipVertexDistance , event_weight);
 	      
+		AssociatedBlipVertexDistVsProxTrkDist[genie_mode][1]->Fill(blip_ProxTrkDist->at(blip),blipVertexDistance , event_weight);
+		ProxDistVsNeutronMultiplicity[genie_mode][1]->Fill(blip_ProxTrkDist->at(blip) ,TrueNeutronCounter , event_weight);
+		VertexDistVsNeutronMultiplicity[genie_mode][1]->Fill(blipVertexDistance ,TrueNeutronCounter , event_weight);
 		BlipProxDistVsPMissMag[genie_mode][1]->Fill(blip_ProxTrkDist->at(blip),recoPMissingMag ,event_weight);
 		BlipVertexDistVsPMissMag[genie_mode][1]->Fill(blipVertexDistance,recoPMissingMag ,event_weight);
 		BlipProxDistVsPMissDir[genie_mode][1]->Fill(blip_ProxTrkDist->at(blip),recoPMissingDir ,event_weight);
@@ -987,18 +1104,43 @@ void NeutrinoSelectionFilter::Loop() {
 		BlipVertexDistVsEnergy[1]->Fill(blipVertexDistance, blip_Energy->at(blip), event_weight);
 		BlipProxDistVsEnergy[1]->Fill(blip_ProxTrkDist->at(blip), blip_Energy->at(blip), event_weight);
 	      
+
+		BlipVertexDistNeut[0][1][NNeut]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[0][1][NNeut]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		
+		BlipVertexDistNeut[genie_mode][1][NNeut]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[genie_mode][1][NNeut]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+	      		
+		if (TrueNeutronCounter <NNeut-1){
+		  BlipVertexDistNeut[0][1][TrueNeutronCounter]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[0][1][TrueNeutronCounter]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		  
+		  BlipVertexDistNeut[genie_mode][1][TrueNeutronCounter]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[genie_mode][1][TrueNeutronCounter]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		} //End of true neutron Counter check
+		
+		else{
+		  BlipVertexDistNeut[0][1][NNeut-1]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[0][1][NNeut-1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		  
+		  BlipVertexDistNeut[genie_mode][1][NNeut-1]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[genie_mode][1][NNeut-1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		} //End of overflow for neutron statement
+
+		
+
 		if (blip_pdg->at(blip) == 2212){
 		  ProtonBlipDist[0][1]->Fill(blipVertexDistance, event_weight);
 		  ProtonBlipDist[genie_mode][1]->Fill(blipVertexDistance, event_weight);	      
 		
-		  ProtonBlipCharge[0][1]->Fill(blip_Charge->at(blip), event_weight);
+		  //ProtonBlipCharge[0][1]->Fill(blip_Charge->at(blip), event_weight);
 		  ProtonBlipProxTrkDist[0][1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		  ProtonBlipTime[0][1]->Fill(blip_Time->at(blip), event_weight);
 		  //ProtonBlipLength[0][1]->Fill(blip_Length->at(blip), event_weight);
 		  ProtonBlipMaxWireSpan[0][1]->Fill(blip_MaxWireSpan->at(blip), event_weight);
 		  ProtonBlipEnergy[0][1]->Fill(blip_Energy->at(blip), event_weight);
 		
-		  ProtonBlipCharge[genie_mode][1]->Fill(blip_Charge->at(blip), event_weight);
+		  //ProtonBlipCharge[genie_mode][1]->Fill(blip_Charge->at(blip), event_weight);
 		  ProtonBlipProxTrkDist[genie_mode][1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		  ProtonBlipTime[genie_mode][1]->Fill(blip_Time->at(blip), event_weight);
 		  //ProtonBlipLength[genie_mode][1]->Fill(blip_Length->at(blip), event_weight);
@@ -1031,14 +1173,14 @@ void NeutrinoSelectionFilter::Loop() {
 		BlipVertexDist[0][2]->Fill(blipVertexDistance,event_weight);
 		BlipVertexDist[genie_mode][2]->Fill(blipVertexDistance,event_weight);
 	      
-		BlipCharge[0][2]->Fill(blip_Charge->at(blip), event_weight);
+		//BlipCharge[0][2]->Fill(blip_Charge->at(blip), event_weight);
 		BlipProxTrkDist[0][2]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		BlipTime[0][2]->Fill(blip_Time->at(blip), event_weight);
 		//BlipLength[0][2]->Fill(blip_Length->at(blip), event_weight);
 		BlipMaxWireSpan[0][2]->Fill(blip_MaxWireSpan->at(blip), event_weight);
 		BlipEnergy[0][2]->Fill(blip_Energy->at(blip), event_weight);
 	      
-		BlipCharge[genie_mode][2]->Fill(blip_Charge->at(blip), event_weight);
+		//BlipCharge[genie_mode][2]->Fill(blip_Charge->at(blip), event_weight);
 		BlipProxTrkDist[genie_mode][2]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		BlipTime[genie_mode][2]->Fill(blip_Time->at(blip), event_weight);
 		//BlipLength[genie_mode][2]->Fill(blip_Length->at(blip), event_weight);
@@ -1053,7 +1195,13 @@ void NeutrinoSelectionFilter::Loop() {
 		BlipVertexDistVsPMissDir[0][2]->Fill(blipVertexDistance,recoPMissingDir ,event_weight);
 		BlipMultiplicityVsProxDist[0][2]->Fill(blip_ProxTrkDist->at(blip),TMath::Abs(numBlips) ,event_weight);
 		BlipMultiplicityVsVertexDist[0][2]->Fill(blipVertexDistance, TMath::Abs(numBlips) ,event_weight);
+		ProxDistVsNeutronMultiplicity[0][2]->Fill(blip_ProxTrkDist->at(blip) ,TrueNeutronCounter , event_weight);
+		VertexDistVsNeutronMultiplicity[0][2]->Fill(blipVertexDistance ,TrueNeutronCounter , event_weight);
+		AssociatedBlipVertexDistVsProxTrkDist[0][2]->Fill(blip_ProxTrkDist->at(blip),blipVertexDistance , event_weight);
 	      
+		AssociatedBlipVertexDistVsProxTrkDist[genie_mode][2]->Fill(blip_ProxTrkDist->at(blip),blipVertexDistance , event_weight);
+		ProxDistVsNeutronMultiplicity[genie_mode][2]->Fill(blip_ProxTrkDist->at(blip) ,TrueNeutronCounter , event_weight);
+		VertexDistVsNeutronMultiplicity[genie_mode][2]->Fill(blipVertexDistance ,TrueNeutronCounter , event_weight);
 		BlipProxDistVsPMissMag[genie_mode][2]->Fill(blip_ProxTrkDist->at(blip),recoPMissingMag ,event_weight);
 		BlipVertexDistVsPMissMag[genie_mode][2]->Fill(blipVertexDistance,recoPMissingMag ,event_weight);
 		BlipProxDistVsPMissDir[genie_mode][2]->Fill(blip_ProxTrkDist->at(blip),recoPMissingDir ,event_weight);
@@ -1064,19 +1212,43 @@ void NeutrinoSelectionFilter::Loop() {
 		BlipVertexDistVsEnergy[2]->Fill(blipVertexDistance, blip_Energy->at(blip), event_weight);
 		BlipProxDistVsEnergy[2]->Fill(blip_ProxTrkDist->at(blip), blip_Energy->at(blip), event_weight);
 
+		BlipVertexDistNeut[0][2][NNeut]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[0][2][NNeut]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		
+		BlipVertexDistNeut[genie_mode][2][NNeut]->Fill(blipVertexDistance, event_weight);
+		BlipProxTrkDistNeut[genie_mode][2][NNeut]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+
+
+		if (TrueNeutronCounter <NNeut-1){
+		  BlipVertexDistNeut[0][2][TrueNeutronCounter]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[0][2][TrueNeutronCounter]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		  
+		  BlipVertexDistNeut[genie_mode][2][TrueNeutronCounter]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[genie_mode][2][TrueNeutronCounter]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		} //End of true neutron Counter check
+		
+		else{
+		  BlipVertexDistNeut[0][2][NNeut-1]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[0][2][NNeut-1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		  
+		  BlipVertexDistNeut[genie_mode][2][NNeut-1]->Fill(blipVertexDistance, event_weight);
+		  BlipProxTrkDistNeut[genie_mode][2][NNeut-1]->Fill(blip_ProxTrkDist->at(blip), event_weight);
+		} //End of overflow for neutron statement
+		
+
 
 		if (blip_pdg->at(blip) == 2212){
 		  ProtonBlipDist[0][2]->Fill(blipVertexDistance, event_weight);
 		  ProtonBlipDist[genie_mode][2]->Fill(blipVertexDistance, event_weight);	      
 		
-		  ProtonBlipCharge[0][2]->Fill(blip_Charge->at(blip), event_weight);
+		  //ProtonBlipCharge[0][2]->Fill(blip_Charge->at(blip), event_weight);
 		  ProtonBlipProxTrkDist[0][2]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		  ProtonBlipTime[0][2]->Fill(blip_Time->at(blip), event_weight);
 		  //ProtonBlipLength[0][2]->Fill(blip_Length->at(blip), event_weight);
 		  ProtonBlipMaxWireSpan[0][2]->Fill(blip_MaxWireSpan->at(blip), event_weight);
 		  ProtonBlipEnergy[0][2]->Fill(blip_Energy->at(blip), event_weight);
 		
-		  ProtonBlipCharge[genie_mode][2]->Fill(blip_Charge->at(blip), event_weight);
+		  //ProtonBlipCharge[genie_mode][2]->Fill(blip_Charge->at(blip), event_weight);
 		  ProtonBlipProxTrkDist[genie_mode][2]->Fill(blip_ProxTrkDist->at(blip), event_weight);
 		  ProtonBlipTime[genie_mode][2]->Fill(blip_Time->at(blip), event_weight);
 		  //ProtonBlipLength[genie_mode][2]->Fill(blip_Length->at(blip), event_weight);
@@ -1090,15 +1262,255 @@ void NeutrinoSelectionFilter::Loop() {
 	      } //End of else statement for plotting nonCC1p0pi events
 	      
 	    } //End of if statement for Trk ID == MuonID/ProtonID 
+	    
 	  } //End of if statement for blip_pdg not default value (-9)
-        } //End of for loop over the blips	
+        } //End of for loop over the blips
 	
-	blipCounter++; 
 
+	//cout << blipCounter << endl;
+	AssociatedBlipMultiplicity[0][0]->Fill(blipCounter, event_weight);
+	AssociatedBlipMultiplicity[genie_mode][0]->Fill(blipCounter, event_weight);
+
+	if (CC1p0pi == true){
+	  AssociatedBlipMultiplicity[0][1]->Fill(blipCounter, event_weight);
+	  AssociatedBlipMultiplicity[genie_mode][1]->Fill(blipCounter, event_weight);
+	}
+
+	else{
+	  AssociatedBlipMultiplicity[0][2]->Fill(blipCounter, event_weight);
+	  AssociatedBlipMultiplicity[genie_mode][2]->Fill(blipCounter, event_weight);
+	}
+
+
+	//Using the Associated blip Multiplicity, rerun through the blips to make 2D plots of each
+	for (int ablip =0; ablip< blipCounter; ablip++){
+	  blipVertexTooSmall = false;
+	  if (blipVertex.at(ablip) < 150){ blipVertexTooSmall = true; } //Changing flag for a blip too close
+	
+	  AssociatedBlipMultVsVertexDist[0][0][NNeut]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	  AssociatedBlipMultVsProxTrkDist[0][0][NNeut]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	  
+	  AssociatedBlipMultVsVertexDist[genie_mode][0][NNeut]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	  AssociatedBlipMultVsProxTrkDist[genie_mode][0][NNeut]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+
+
+	  if(CC1p0pi ==true){
+	    AssociatedBlipMultVsVertexDist[0][1][NNeut]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[0][1][NNeut]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	    
+	    AssociatedBlipMultVsVertexDist[genie_mode][1][NNeut]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[genie_mode][1][NNeut]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	  } //End of if statement for true signal events
+
+	  
+	  else {
+	    AssociatedBlipMultVsVertexDist[0][2][NNeut]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[0][2][NNeut]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	    
+	    AssociatedBlipMultVsVertexDist[genie_mode][2][NNeut]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[genie_mode][2][NNeut]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	  }
+
+
+	  
+	  if (TrueNeutronCounter < NNeut-1){
+	    AssociatedBlipMultVsVertexDist[0][0][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[0][0][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+
+	    //cout << "Associated Blip Vertex Distance: " << blipVertex.at(ablip) << "  Associated Blip Prox Track Distance: " <<blipProxTrk.at(ablip)<< endl;
+
+	    AssociatedBlipMultVsVertexDist[genie_mode][0][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[genie_mode][0][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	 
+	    if (CC1p0pi ==true){
+	      AssociatedBlipMultVsVertexDist[0][1][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[0][1][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	      
+	      AssociatedBlipMultVsVertexDist[genie_mode][1][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[genie_mode][1][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	    } //End of if statement for true signal events
+
+	    else if (CC1p0pi == false){
+	      AssociatedBlipMultVsVertexDist[0][2][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[0][2][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	      
+	      AssociatedBlipMultVsVertexDist[genie_mode][2][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[genie_mode][2][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+
+	    } //End of else if statement for background events
+	  } //End of if statement for neutron multiplicity requirements
+	  
+
+	  
+	  else {
+	    
+
+	    AssociatedBlipMultVsVertexDist[0][0][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[0][0][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+
+	    //cout << "Associated Blip Vertex Distance: " << blipVertex.at(ablip) << "  Associated Blip Prox Track Distance: " <<blipProxTrk.at(ablip)<< endl;
+
+	    AssociatedBlipMultVsVertexDist[genie_mode][0][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	    AssociatedBlipMultVsProxTrkDist[genie_mode][0][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	 
+	    if (CC1p0pi ==true){
+	      AssociatedBlipMultVsVertexDist[0][1][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[0][1][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	      
+	      AssociatedBlipMultVsVertexDist[genie_mode][1][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[genie_mode][1][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	    } //End of if statement for true signal events
+
+	    else if (CC1p0pi == false){
+	      AssociatedBlipMultVsVertexDist[0][2][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[0][2][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+	      
+	      AssociatedBlipMultVsVertexDist[genie_mode][2][TrueNeutronCounter]->Fill(blipVertex.at(ablip) ,blipCounter , event_weight) ;
+	      AssociatedBlipMultVsProxTrkDist[genie_mode][2][TrueNeutronCounter]->Fill(blipProxTrk.at(ablip) ,blipCounter , event_weight) ;
+
+	    } //End of else if statement for background events
+	  } //End of overflow bin for neutron multiplicity
+
+	 
+	}//End of for loop over the associated blips
       } //End of if statement for blip_ID->size() >0 
       
+
+
+
+      //Perform the second round of selection cuts using the associated blips and vertex distance
+
+      //Using the Associated blips selection cut
+      if (!(blip_ID->size() >0 && blipCounter >5)){
+	
+	if (blipCounter >5 ) cout << "--------------------------------------- Error 1 Multiplicity ---------------------------------" << endl;
+
+	PostBlipCutRecoMuonCosThetaPlot[0][0][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	PostBlipCutRecoDeltaPtPlot[0][0][0]->Fill(recoDeltaPT,event_weight);
+	PostBlipCutRecoDeltaAlphaTPlot[0][0][0]->Fill(recoDeltaAlphaT,event_weight);
+	PostBlipCutTrueNeutronMultiplicityPlot[0][0][0]->Fill(TrueNeutronCounter, event_weight);
       
+	PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][0][0]->Fill(TrueNeutronCounter, event_weight);      
+	PostBlipCutRecoMuonCosThetaPlot[genie_mode][0][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	PostBlipCutRecoDeltaPtPlot[genie_mode][0][0]->Fill(recoDeltaPT,event_weight);
+	PostBlipCutRecoDeltaAlphaTPlot[genie_mode][0][0]->Fill(recoDeltaAlphaT,event_weight);
+
+	if (CC1p0pi ==true){
+	  PostBlipCutRecoMuonCosThetaPlot[0][1][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[0][1][0]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[0][1][0]->Fill(recoDeltaAlphaT,event_weight);
+	  PostBlipCutTrueNeutronMultiplicityPlot[0][1][0]->Fill(TrueNeutronCounter, event_weight);
+	
+	  PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][1][0]->Fill(TrueNeutronCounter, event_weight);      	
+	  PostBlipCutRecoMuonCosThetaPlot[genie_mode][1][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[genie_mode][1][0]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[genie_mode][1][0]->Fill(recoDeltaAlphaT,event_weight);
+	} //End of CC1p0pi plotting section
+
+	else {
+	  PostBlipCutRecoMuonCosThetaPlot[0][2][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[0][2][0]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[0][2][0]->Fill(recoDeltaAlphaT,event_weight);
+	  PostBlipCutTrueNeutronMultiplicityPlot[0][2][0]->Fill(TrueNeutronCounter, event_weight);
       
+	  PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][2][0]->Fill(TrueNeutronCounter, event_weight);      
+	  PostBlipCutRecoMuonCosThetaPlot[genie_mode][2][0]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[genie_mode][2][0]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[genie_mode][2][0]->Fill(recoDeltaAlphaT,event_weight);
+	} //End of nonCC1p0pi plotting section
+      } //End of associated blip cuts
+
+
+
+      //Applying the vertex distance cut
+      if (!(blip_ID->size() >0 && blipVertexTooSmall ==true)){ 
+
+	if (blipVertexTooSmall == true ) cout <<" ------------------------------------- Error 2 Vertex ------------------------------------------" << endl;
+
+
+	PostBlipCutRecoMuonCosThetaPlot[0][0][1]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	PostBlipCutRecoDeltaPtPlot[0][0][1]->Fill(recoDeltaPT,event_weight);
+	PostBlipCutRecoDeltaAlphaTPlot[0][0][1]->Fill(recoDeltaAlphaT,event_weight);
+	PostBlipCutTrueNeutronMultiplicityPlot[0][0][1]->Fill(TrueNeutronCounter, event_weight);
+      
+	PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][0][1]->Fill(TrueNeutronCounter, event_weight);      
+	PostBlipCutRecoMuonCosThetaPlot[genie_mode][0][1]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	PostBlipCutRecoDeltaPtPlot[genie_mode][0][1]->Fill(recoDeltaPT,event_weight);
+	PostBlipCutRecoDeltaAlphaTPlot[genie_mode][0][1]->Fill(recoDeltaAlphaT,event_weight);
+
+	if (CC1p0pi ==true){
+	  PostBlipCutRecoMuonCosThetaPlot[0][1][1]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[0][1][1]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[0][1][1]->Fill(recoDeltaAlphaT,event_weight);
+	  PostBlipCutTrueNeutronMultiplicityPlot[0][1][1]->Fill(TrueNeutronCounter, event_weight);
+	
+	  PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][1][1]->Fill(TrueNeutronCounter, event_weight);      	
+	  PostBlipCutRecoMuonCosThetaPlot[genie_mode][1][1]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[genie_mode][1][1]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[genie_mode][1][1]->Fill(recoDeltaAlphaT,event_weight);
+	} //End of CC1p0pi plotting section
+
+	else {
+	  PostBlipCutRecoMuonCosThetaPlot[0][2][1]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[0][2][1]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[0][2][1]->Fill(recoDeltaAlphaT,event_weight);
+	  PostBlipCutTrueNeutronMultiplicityPlot[0][2][1]->Fill(TrueNeutronCounter, event_weight);
+      
+	  PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][2][1]->Fill(TrueNeutronCounter, event_weight);      
+	  PostBlipCutRecoMuonCosThetaPlot[genie_mode][2][1]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[genie_mode][2][1]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[genie_mode][2][1]->Fill(recoDeltaAlphaT,event_weight);
+	} //End of nonCC1p0pi plotting section
+      } //End of vertex distance cut
+
+
+
+
+      //Perform cuts on both vertex distance and associated blip multiplicity      
+      if (!(blip_ID->size() >0 && (blipVertexTooSmall ==true || blipCounter >5))){
+	
+	if (blipVertexTooSmall == true ) cout <<" ----------------------------------------- Error 3 Vertex ------------------------------------------" << endl;
+	if (blipCounter >5 ) cout << "--------------------------------------- Error 3 Multiplicity ---------------------------------" << endl;
+
+	PostBlipCutRecoMuonCosThetaPlot[0][0][2]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	PostBlipCutRecoDeltaPtPlot[0][0][2]->Fill(recoDeltaPT,event_weight);
+	PostBlipCutRecoDeltaAlphaTPlot[0][0][2]->Fill(recoDeltaAlphaT,event_weight);
+	PostBlipCutTrueNeutronMultiplicityPlot[0][0][2]->Fill(TrueNeutronCounter, event_weight);
+      
+	PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][0][2]->Fill(TrueNeutronCounter, event_weight);      
+	PostBlipCutRecoMuonCosThetaPlot[genie_mode][0][2]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	PostBlipCutRecoDeltaPtPlot[genie_mode][0][2]->Fill(recoDeltaPT,event_weight);
+	PostBlipCutRecoDeltaAlphaTPlot[genie_mode][0][2]->Fill(recoDeltaAlphaT,event_weight);
+
+	if (CC1p0pi ==true){
+	  PostBlipCutRecoMuonCosThetaPlot[0][1][2]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[0][1][2]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[0][1][2]->Fill(recoDeltaAlphaT,event_weight);
+	  PostBlipCutTrueNeutronMultiplicityPlot[0][1][2]->Fill(TrueNeutronCounter, event_weight);
+	
+	  PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][1][2]->Fill(TrueNeutronCounter, event_weight);      	
+	  PostBlipCutRecoMuonCosThetaPlot[genie_mode][1][2]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[genie_mode][1][2]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[genie_mode][1][2]->Fill(recoDeltaAlphaT,event_weight);
+	} //End of CC1p0pi plotting section
+
+	else {
+	  PostBlipCutRecoMuonCosThetaPlot[0][2][2]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[0][2][2]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[0][2][2]->Fill(recoDeltaAlphaT,event_weight);
+	  PostBlipCutTrueNeutronMultiplicityPlot[0][2][2]->Fill(TrueNeutronCounter, event_weight);
+      
+	  PostBlipCutTrueNeutronMultiplicityPlot[genie_mode][2][2]->Fill(TrueNeutronCounter, event_weight);      
+	  PostBlipCutRecoMuonCosThetaPlot[genie_mode][2][2]->Fill(TMath::Cos(CandidateMuonTrackTheta),event_weight);
+	  PostBlipCutRecoDeltaPtPlot[genie_mode][2][2]->Fill(recoDeltaPT,event_weight);
+	  PostBlipCutRecoDeltaAlphaTPlot[genie_mode][2][2]->Fill(recoDeltaAlphaT,event_weight);
+	} //End of nonCC1p0pi plotting section
+      } // End of combination of associated blip cut and vertex distance cut
+
+
+
+
+
       // Reco CC1p0pi candidate event selected, print out details
       if (CC1p0pi) {
 	//if (protonBlip ==true ){
@@ -1109,7 +1521,7 @@ void NeutrinoSelectionFilter::Loop() {
      
 
    } // End of the loop over the events
-   cout << "Counter: " << counter  << "  True Counter: " << trueCounter<< "   Blip Counter: " << blipCounter << "   No Blip Counter: " << noBlipCounter<< endl;
+   cout << "Counter: " << counter  << "  True Counter: " << trueCounter << "   No Blip Counter: " << noBlipCounter<< endl;
 
 
    // Divide by bin width with Reweight function

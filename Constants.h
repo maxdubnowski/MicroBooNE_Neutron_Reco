@@ -14,7 +14,7 @@ using namespace std;
 
 namespace Constants {
   
-  bool PMissingCut  = false;
+  bool PMissingCut  = true;
   
 
   // Run 1 constants
@@ -22,6 +22,7 @@ namespace Constants {
   double data_pot = 1.62E20;
   //double mc_pot = 1.31E+21; // Full Run 1 MC
   double mc_pot = 5.1303e+19;
+  double mc_pot_highStat = 8.03359E+20;
   double integrated_flux = 1.19E11; // cm^-2                                                                                                                                                      
   double number_targets = 1.05E30; // Argon nuclei, not nucleons    
   
@@ -97,11 +98,13 @@ namespace Constants {
   
   // Constants, Cuts & Thresholds
   
+  std::vector<TString> BlipCuts = {"_AssocBlipCut","_VertexBlipCut" , "_BothBlipCuts"};
   std::vector<TString> InteractionLabels = {"","QE","MEC","RES","DIS","COH"};
   std::vector<TString> CC1p0piLabels = {"_AllEvents", "_CC1p0piEvent", "_nonCC1p0piEvent"};
   const int NType = CC1p0piLabels.size();
   const int NInte = InteractionLabels.size();
-  
+  const int NNeut = 4;
+  const int NCuts = BlipCuts.size();
   //--------------------------------------------------//
   
 }

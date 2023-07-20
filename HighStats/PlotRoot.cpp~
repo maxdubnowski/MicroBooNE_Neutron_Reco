@@ -1,7 +1,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TString.h>
-#include "Constants.h"
+#include "../Constants.h"
 
 using namespace std;
 using namespace Constants;
@@ -25,10 +25,10 @@ void PlotRoot() {
 	double TextSize = 0.06;			
 	double LegendTextSize = 0.03;
 
-	TString OutFilePath = "/uboone/app/users/maxd/MicroBooNE_Neutron_Reco/";
+	TString OutFilePath = "/uboone/app/users/maxd/MicroBooNE_Neutron_Reco/HighStats/";
 	
 	bool stackedHist = false;
-
+       
 
 	std::vector<TString> PlotNames;
 	///*
@@ -37,19 +37,23 @@ void PlotRoot() {
 	// PlotNames.push_back("TrackMultiplicity");
 	// PlotNames.push_back("ShowerMultiplicity");
 	// PlotNames.push_back("BlipPDG");
+
+
+
 	// PlotNames.push_back("BlipMultiplicity");
+	// PlotNames.push_back("AssociatedBlipMultiplicity");
 	// PlotNames.push_back("XAxisBlipLocation");
 	// PlotNames.push_back("YAxisBlipLocation");
 	// PlotNames.push_back("ZAxisBlipLocation");
 	// PlotNames.push_back("BlipVertexDist");
 	// PlotNames.push_back("ProtonBlipDist");
-	// PlotNames.push_back("BlipCharge");
+
 	// PlotNames.push_back("BlipProxTrkDist");
 	// PlotNames.push_back("BlipTime");
 	// PlotNames.push_back("BlipMaxWireSpan");
 	// PlotNames.push_back("BlipEnergy");
 
-	// PlotNames.push_back("ProtonBlipCharge");
+
 	// PlotNames.push_back("ProtonBlipProxTrkDist");
 	// PlotNames.push_back("ProtonBlipTime");
 	// PlotNames.push_back("ProtonBlipMaxWireSpan");
@@ -75,8 +79,34 @@ void PlotRoot() {
 	// PlotNames.push_back("BacktrackedDeltaAlphaTPlot");
 	
 
-	//PlotNames.push_back("TrueMuonEnergyPlot");
-	//PlotNames.push_back("TrueNeutronMultiplicityPlot");
+	// PlotNames.push_back("TrueMuonEnergyPlot");
+        PlotNames.push_back("TrueNeutronMultiplicityPlot");
+
+	// PlotNames.push_back("BlipVertexDistNeutron0");
+	// PlotNames.push_back("BlipProxTrkDistNeutron0");
+	// PlotNames.push_back("BlipVertexDistNeutron1");
+	// PlotNames.push_back("BlipProxTrkDistNeutron1");
+	// PlotNames.push_back("BlipVertexDistNeutron2");
+	// PlotNames.push_back("BlipProxTrkDistNeutron2");
+	// PlotNames.push_back("BlipVertexDistNeutron3");
+	// PlotNames.push_back("BlipProxTrkDistNeutron3");
+	// PlotNames.push_back("BlipVertexDistOverNeutron4");
+	// PlotNames.push_back("BlipProxTrkDistOverNeutron4");
+
+	PlotNames.push_back("PostBlipCutRecoMuonCosThetaPlot"+BlipCuts[0]);
+	PlotNames.push_back("PostBlipCutRecoDeltaPtPlot"+BlipCuts[0]);
+	PlotNames.push_back("PostBlipCutRecoDeltaAlphaTPlot"+BlipCuts[0]);
+	PlotNames.push_back("PostBlipCutTrueNeutronMultiplicityPlot"+BlipCuts[0]);
+
+	PlotNames.push_back("PostBlipCutRecoMuonCosThetaPlot"+BlipCuts[1]);
+	PlotNames.push_back("PostBlipCutRecoDeltaPtPlot"+BlipCuts[1]);
+	PlotNames.push_back("PostBlipCutRecoDeltaAlphaTPlot"+BlipCuts[1]);
+	PlotNames.push_back("PostBlipCutTrueNeutronMultiplicityPlot"+BlipCuts[1]);
+
+	PlotNames.push_back("PostBlipCutRecoMuonCosThetaPlot"+BlipCuts[2]);
+	PlotNames.push_back("PostBlipCutRecoDeltaPtPlot"+BlipCuts[2]);
+	PlotNames.push_back("PostBlipCutRecoDeltaAlphaTPlot"+BlipCuts[2]);
+	PlotNames.push_back("PostBlipCutTrueNeutronMultiplicityPlot"+BlipCuts[2]);
 
 	const int NPlots = PlotNames.size();
 	
@@ -184,7 +214,7 @@ void PlotRoot() {
 	      
 	      if (iSample == 0) all_integral = Histos[iSample]->Integral();
 	      
-	      leg->AddEntry(Histos[iSample],Labels[iSample] + "  (" + to_string(Histos[iSample]->Integral() / all_integral) +  ") "  ,"l");
+	      leg->AddEntry(Histos[iSample],Labels[iSample] + "  (" + to_string(Histos[iSample]->Integral() / all_integral) +  ")  " + to_string(Histos[iSample]->Integral())  ,"l");
 	      
 		
 	    } // End of the loop over the samples grabing the plots	
@@ -192,8 +222,8 @@ void PlotRoot() {
 	    PlotCanvas->cd();
 	    leg->Draw();
 	    
-	    if (PMissingCut == false) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"_MicroBooNE_Reco.pdf");
-	    else if (PMissingCut == true) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"NeutronCuts_MicroBooNE_Reco.pdf");
+	    if (PMissingCut == false) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"_MicroBooNE_Reco_HighStats.pdf");
+	    else if (PMissingCut == true) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"NeutronCuts_MicroBooNE_Reco_HighStats.pdf");
 	    //PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"1MillionEvt_MicroBooNE_Reco.pdf"); 
 	    
 	    
@@ -355,8 +385,8 @@ void PlotRoot() {
 	  
 	  
 	    
-	    if (PMissingCut == false) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"StackedHisto_MicroBooNE_Reco.pdf");
-	    else if (PMissingCut == true) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"StackedHistoNeutronCuts_MicroBooNE_Reco.pdf"); 
+	    if (PMissingCut == false) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"StackedHisto_MicroBooNE_Reco_HighStats.pdf");
+	    else if (PMissingCut == true) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"StackedHistoNeutronCuts_MicroBooNE_Reco_HighStats.pdf"); 
 	    //PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"1MillionEvtStackedHisto_MicroBooNE_Reco.pdf"); 
 	  
 	  
@@ -365,8 +395,169 @@ void PlotRoot() {
 
 	  //*/
 	  // ---------------------- End of Method 2 ------------------------- //
-	}
+
+	} // End of else statement for choosing method 2
 	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	if (false){
+
+
+	  // -------------------- Method 3: Overlayed Line Histograms in a Single Canvas ---------------------- //
+
+
+	  std::vector<TString> Names; std::vector<TString> Labels; std::vector<int> Colors;
+
+	  Names.push_back(OutFilePath+"MicroBooNE_Reco.root"); 
+	  Labels.push_back("All");
+	  Colors.push_back(kBlack);	
+	  
+	  Names.push_back(OutFilePath+"MicroBooNE_Reco.root"); 
+	  Labels.push_back("CC1p0#pi");
+	  Colors.push_back(kCyan+2);	
+	  
+	  Names.push_back(OutFilePath+"MicroBooNE_Reco.root"); 
+	  Labels.push_back("nonCC1p0#pi");
+	  Colors.push_back(kRed+2);		
+
+	  const int NSamples = Names.size();
+	  std::vector<TFile*> Files; Files.resize(NSamples);
+
+
+	  // Loop over the samples to open the files and the TTree
+	  for (int iSample = 0; iSample < NSamples; iSample++) {
+	    Files[iSample] = new TFile(Names[iSample],"readonly");
+	  } // End of the loop over the samples
+
+
+
+
+	  vector<int> LineStyle;
+	  LineStyle = {1, 1, 2};
+
+
+
+	  // Loop over the plots to be compared
+	  for (int iPlot = 0; iPlot < NPlots; iPlot++) {
+	    
+	    TString CanvasName = "Canvas_" + PlotNames[iPlot];
+	    TCanvas* PlotCanvas = new TCanvas(CanvasName,CanvasName,205,34,1024,768);
+	    PlotCanvas->Divide(2, 3);
+
+	    PlotCanvas->cd();
+	    PlotCanvas->SetTopMargin(0.12);
+	    PlotCanvas->SetLeftMargin(0.2);
+	    PlotCanvas->SetBottomMargin(0.15);		
+	    PlotCanvas->Draw();	
+	    
+	    TLegend* leg  = new TLegend(0.35,0.89, 0.85, 0.99 ); //On the right side of plot and above border
+	    //TLegend* leg  = new TLegend(0.2,0.7,0.55,0.83); //Original from Afro
+	    leg->SetBorderSize(0);
+	    leg->SetNColumns(1);
+	    leg->SetTextSize(LegendTextSize); 
+	    leg->SetTextFont(FontStyle);						
+	    
+	    // Loop over the samples to open the files and to get the corresponding plot
+	    double all_integral =0;
+	    std::vector<double> integral; integral.resize(NSamples);
+
+
+	    std::vector<TH1D*> Histos; Histos.resize(NSamples);
+	    
+	    for (int iSample = 0; iSample < NSamples; iSample++) {	
+	      
+	      Histos[iSample] = (TH1D*)(Files[iSample]->Get(PlotNames[iPlot]+CC1p0piLabels[iSample] ));
+	      
+	      
+	      Histos[iSample]->SetLineWidth(4);
+	      Histos[iSample]->SetLineStyle(LineStyle[iSample]);
+	      Histos[iSample]->SetLineColor( Colors.at(iSample) );	
+	      
+	      Histos[iSample]->GetXaxis()->SetTitleFont(FontStyle);
+	      Histos[iSample]->GetXaxis()->SetLabelFont(FontStyle);
+	      Histos[iSample]->GetXaxis()->SetNdivisions(8);
+	      Histos[iSample]->GetXaxis()->SetLabelSize(TextSize);
+	      Histos[iSample]->GetXaxis()->SetTitleSize(TextSize);	
+	      Histos[iSample]->GetXaxis()->SetTitleOffset(1.1);					
+	      Histos[iSample]->GetXaxis()->CenterTitle();						
+	      
+	      Histos[iSample]->GetYaxis()->SetTitleFont(FontStyle);
+	      Histos[iSample]->GetYaxis()->SetLabelFont(FontStyle);
+	      Histos[iSample]->GetYaxis()->SetNdivisions(6);
+	      Histos[iSample]->GetYaxis()->SetLabelSize(TextSize);
+	      //Histos[iSample]->GetYaxis()->SetTitle("Weighted Events / 1.62E20 POT ");
+	      Histos[iSample]->GetYaxis()->SetTitleSize(TextSize);
+	      Histos[iSample]->GetYaxis()->SetTitleOffset(1.2);
+	      Histos[iSample]->GetYaxis()->SetTickSize(0);
+	      Histos[iSample]->GetYaxis()->CenterTitle();	
+	      
+	      double imax = TMath::Max(Histos[iSample]->GetMaximum(),Histos[0]->GetMaximum());			
+	      Histos[iSample]->GetYaxis()->SetRangeUser(0.,1.1*imax);
+	      Histos[0]->GetYaxis()->SetRangeUser(0.,1.1*imax);			
+	      
+	      PlotCanvas->cd(iSample+1);
+	      Histos[iSample]->Draw("hist same");// e");
+	      Histos[0]->Draw("hist same");// e");	
+	      
+	      if (iSample == 0) all_integral = Histos[iSample]->Integral();
+	      
+	      leg->AddEntry(Histos[iSample],Labels[iSample] + "  (" + to_string(Histos[iSample]->Integral() / all_integral) +  ") "  ,"l");
+	      
+		
+	    } // End of the loop over the samples grabing the plots	
+		
+	    PlotCanvas->cd();
+	    PlotCanvas->Draw();
+	    leg->Draw();
+	    
+	    if (PMissingCut == false) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"_MicroBooNE_Reco_HighStats.pdf");
+	    else if (PMissingCut == true) PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"NeutronCuts_MicroBooNE_Reco_HighStats.pdf");
+	    //PlotCanvas->SaveAs("myPlots/"+PlotNames[iPlot]+"1MillionEvt_MicroBooNE_Reco.pdf"); 
+	    
+	    
+	  } // End of the loop over the plots
+	  
+	} // End of if statement for method 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
